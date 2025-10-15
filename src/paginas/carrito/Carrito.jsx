@@ -2,6 +2,8 @@ import React, { useMemo } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
+import Footer from "../landingpage/FOOTER/Footer";
+import Navbarperfume from "../landingpage/NAVBAR/Navbar";
 
 const Carrito = () => {
   const dispatch = useDispatch();
@@ -47,7 +49,9 @@ const Carrito = () => {
   };
 
   return (
-    <div className="container py-4" style={{ backgroundColor: "#000" }}>
+    <>
+    <Navbarperfume></Navbarperfume>
+    <div className="container py-4 mt-3" style={{ backgroundColor: "#000" }}>
       <div className="row g-4">
         {/* Listado de items */}
         <div className="col-12 col-lg-8">
@@ -202,6 +206,8 @@ const Carrito = () => {
         </div>
       </div>
     </div>
+          <Footer></Footer>
+    </>
   );
 };
 

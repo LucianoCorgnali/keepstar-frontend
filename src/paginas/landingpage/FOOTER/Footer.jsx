@@ -4,7 +4,7 @@ const Footer = () => {
 
 
     return (
-        <footer className="footer-dark mt-4 p-5">
+        <footer className="footer-dark shadow-lg mt-4 p-5">
             <div className="row">
                 <div className="col-md-3 mb-3">
                     <h6 className="footer-brand">EL CODIGO, PERFUMERIE</h6>

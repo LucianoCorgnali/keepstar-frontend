@@ -3,12 +3,24 @@ const initialState = {
   user: null,
   selectedProduct: null,
   cartItems: [], // carrito
+  admin:false
 };
 
 function userReducer(state = initialState, action) {
   switch (action.type) {
+    //ESTO ES PARA ENTRAR Y ADEMAS VERIFICAR SI ES ADMIN
+    // SI LA VARIABLE ID = 1 ENTONCES ADMIN ES TRUE
+    //SACAR A FUTURO CUANDO SE MANEJE POR BACK ESTO !!!!!!!
     case "LOGIN_SUCCESS":
-      return { ...state, isLoggedIn: true, user: action.payload };
+        const user = action.payload;
+  return { 
+    ...state, 
+    isLoggedIn: true, 
+    user: {
+      ...user,
+      admin: user.id === 1 ? true : false
+    } 
+  };
 
     case "LOGOUT":
       return { ...state, isLoggedIn: false, user: null, cartItems: [] };

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { useDispatch } from "react-redux";       // ✅ importar dispatch
-import { useNavigate } from "react-router-dom"; // ✅ importar navigate
+import { useDispatch, useSelector } from "react-redux"; // ✅ importar useSelector
+import { useNavigate } from "react-router-dom"; 
 import ProductCard from "../landingpage/ProductCard";
 import "bootstrap/dist/css/bootstrap.min.css";
 import Navbarperfume from "../landingpage/NAVBAR/Navbar";
@@ -9,9 +9,9 @@ import Footer from "../landingpage/FOOTER/Footer";
 const Productos = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const admin = useSelector((state) => state.user?.admin); // ✅ obtener admin del reducer
 
-  // Datos de ejemplo
-  const productosData = [
+ const productosData = [
     {
       id: "chanel-n5",
       name: "Chanel N°5",
@@ -86,32 +86,42 @@ const Productos = () => {
     },
   ];
 
-  // Estados de filtros
+
   const [selectedGender, setSelectedGender] = useState("Todos");
   const [selectedBrand, setSelectedBrand] = useState("Todas");
   const [priceRange, setPriceRange] = useState([0, 200]);
   const [sortOrder, setSortOrder] = useState("asc");
 
-  // Filtrado
-  const filteredProducts = productosData
-    .filter((p) =>
-      selectedGender === "Todos" ? true : p.gender === selectedGender
-    )
+  const [productos, setProductos] = useState(productosData); // estado con productos
+  const [newProduct, setNewProduct] = useState({
+    id: "",
+    name: "",
+    brand: "",
+    price: 0,
+    currency: "€",
+    descripcion: "",
+    gender: "",
+    type: "",
+    image: "",
+  });
+
+  const filteredProducts = productos
+    .filter((p) => (selectedGender === "Todos" ? true : p.gender === selectedGender))
     .filter((p) => (selectedBrand === "Todas" ? true : p.brand === selectedBrand))
     .filter((p) => p.price >= priceRange[0] && p.price <= priceRange[1])
-    .sort((a, b) =>
-      sortOrder === "asc" ? a.price - b.price : b.price - a.price
-    );
+    .sort((a, b) => (sortOrder === "asc" ? a.price - b.price : b.price - a.price));
 
-  // Handler click
+
+  
+
+
+
   const handleProductClick = (product) => {
     dispatch({ type: "SET_SELECTED_PRODUCT", payload: product });
     navigate("/detalle");
   };
 
-
-
-    const handleAddToCart = (product) => {
+  const handleAddToCart = (product) => {
     dispatch({
       type: "ADD_TO_CART",
       payload: {
@@ -121,13 +131,30 @@ const Productos = () => {
         price: product.price,
         currency: product.currency,
         image: product.image,
-        qty: 1, // cantidad inicial
+        qty: 1,
       },
     });
   };
 
+  const handleNewProductChange = (e) => {
+    const { name, value } = e.target;
+    setNewProduct((prev) => ({ ...prev, [name]: value }));
+  };
 
-
+  const handleAddProduct = () => {
+    setProductos((prev) => [...prev, { ...newProduct }]);
+    setNewProduct({
+      id: "",
+      name: "",
+      brand: "",
+      price: 0,
+      currency: "€",
+      descripcion: "",
+      gender: "",
+      type: "",
+      image: "",
+    });
+  };
 
   return (
     <>
@@ -136,10 +163,7 @@ const Productos = () => {
         <div className="row">
           {/* Filtros */}
           <aside className="col-md-3 text-white mb-4">
-            <h4 className="mb-3" style={{ color: "#d4af37" }}>
-              Filtros
-            </h4>
-
+            <h4 className="mb-3" style={{ color: "#d4af37" }}>Filtros</h4>
             {/* Género */}
             <div className="mb-3">
               <label className="form-label">Género</label>
@@ -153,7 +177,6 @@ const Productos = () => {
                 <option value="Masculino">Masculino</option>
               </select>
             </div>
-
             {/* Marca */}
             <div className="mb-3">
               <label className="form-label">Marca</label>
@@ -163,21 +186,14 @@ const Productos = () => {
                 onChange={(e) => setSelectedBrand(e.target.value)}
               >
                 <option value="Todas">Todas</option>
-                {Array.from(new Set(productosData.map((p) => p.brand))).map(
-                  (brand) => (
-                    <option key={brand} value={brand}>
-                      {brand}
-                    </option>
-                  )
-                )}
+                {Array.from(new Set(productos.map((p) => p.brand))).map((brand) => (
+                  <option key={brand} value={brand}>{brand}</option>
+                ))}
               </select>
             </div>
-
             {/* Rango de precio */}
             <div className="mb-3">
-              <label className="form-label">
-                Precio máximo: {priceRange[1]}€
-              </label>
+              <label className="form-label">Precio máximo: {priceRange[1]}€</label>
               <input
                 type="range"
                 className="form-range"
@@ -185,11 +201,30 @@ const Productos = () => {
                 max="200"
                 step="5"
                 value={priceRange[1]}
-                onChange={(e) =>
-                  setPriceRange([priceRange[0], parseInt(e.target.value)])
-                }
+                onChange={(e) => setPriceRange([priceRange[0], parseInt(e.target.value)])}
               />
             </div>
+
+            {/* Formulario para admin */}
+            {admin && (
+              <div className="mt-4 p-3 border border-warning rounded">
+                <h5 className="text-warning mb-3">Agregar producto nuevo</h5>
+                {["id","name","brand","price","descripcion","gender","type","image"].map((field) => (
+                  <div className="mb-2" key={field}>
+                    <input
+                      className="form-control"
+                      placeholder={field}
+                      name={field}
+                      value={newProduct[field]}
+                      onChange={handleNewProductChange}
+                    />
+                  </div>
+                ))}
+                <button className="btn btn-warning w-100 mt-2" onClick={handleAddProduct}>
+                  Agregar producto
+                </button>
+              </div>
+            )}
           </aside>
 
           {/* Listado */}
@@ -214,11 +249,10 @@ const Productos = () => {
                 <div
                   className="col-12 col-sm-6 col-lg-4"
                   key={product.id}
-                  onClick={() => handleProductClick(product)} // ✅ click en el contenedor
+                  onClick={() => handleProductClick(product)}
                   style={{ cursor: "pointer" }}
                 >
                   <ProductCard product={product} onAddToCart={handleAddToCart} />
-
                 </div>
               ))}
             </div>
